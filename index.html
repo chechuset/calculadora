@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Beneficios por Antigüedad</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+    }
+
+    .btn-main {
+      background-color: rgb(0, 125, 92);
+    }
+    .btn-main:hover {
+      background-color: rgb(0, 100, 75);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.4s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-6">
+
+  <div class="bg-white rounded-xl shadow-lg max-w-2xl w-full p-8 border border-gray-100">
+    <header class="mb-8 text-center">
+      <h1 class="text-3xl font-bold text-gray-800">Calculadora de Beneficios</h1>
+      <p class="text-gray-500 mt-2">Vacaciones, días personales y condecoraciones según antigüedad.</p>
+    </header>
+
+    <main>
+      <form id="calculatorForm" class="space-y-6 text-center">
+        <div class="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0 justify-center">
+          <div class="space-y-2 w-full md:w-1/2">
+            <label for="joinDate" class="block text-sm font-semibold text-gray-600 text-center">Fecha de Ingreso</label>
+            <input type="date" id="joinDate" name="joinDate" required
+              class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition-all text-center">
+          </div>
+          <div class="space-y-2 w-full md:w-1/2">
+            <label for="queryYear" class="block text-sm font-semibold text-gray-600 text-center">Año de consulta</label>
+            <input type="number" id="queryYear" name="queryYear" min="2000" max="2100" value="2025" required
+              class="w-full px-4 py-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-green-500 shadow-sm transition-all text-center">
+          </div>
+        </div>
+
+        <div class="flex items-center justify-center space-x-3 pt-2">
+          <input type="checkbox" id="isOfficer" name="isOfficer"
+            class="h-5 w-5 text-green-600 border-gray-300 rounded focus:ring-green-500">
+          <label for="isOfficer" class="text-sm text-gray-700">Soy Oficial / Suboficial</label>
+        </div>
+        
+        <div class="flex justify-center pt-4">
+          <button type="submit"
+            class="px-8 py-3 text-white rounded-lg font-semibold shadow-sm transition-all btn-main focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+            Calcular
+          </button>
+        </div>
+      </form>
+
+      <div id="results-container" class="mt-10 text-center">
+        <div id="initial-state" class="flex flex-col items-center justify-center h-full text-center">
+          <h3 class="text-lg font-semibold text-gray-600">Resultados</h3>
+          <p class="text-gray-400 mt-1">Aquí aparecerán tus beneficios calculados.</p>
+        </div>
+
+        <section id="results" class="hidden grid grid-cols-1 md:grid-cols-2 gap-4 mt-6 justify-center"></section>
+      </div>
+    </main>
+  </div>
+
+  <!-- JS -->
+  <script>
+    document.getElementById('calculatorForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      document.getElementById('initial-state').classList.add('hidden');
+      const resultsSection = document.getElementById('results');
+      resultsSection.classList.remove('hidden');
+
+      const joinDateInput = document.getElementById('joinDate').value;
+      const queryYear = document.getElementById('queryYear').value;
+      const isOfficer = document.getElementById('isOfficer').checked;
+      
+      if (!joinDateInput) {
+        alert("Por favor, introduce una fecha de ingreso.");
+        return;
+      }
+
+      const joinDate = new Date(joinDateInput);
+      const today = new Date();
+
+      const diffInMilliseconds = today - joinDate;
+      const yearsOfService = Math.floor(diffInMilliseconds / (1000 * 60 * 60 * 24 * 365.25));
+      const trienios = Math.floor(yearsOfService / 3);
+
+      let vacationDays = 22;
+      let personalLeaveDays = 6;
+      let cross;
+
+      if (yearsOfService >= 30) {
+        vacationDays += 4;
+      } else if (yearsOfService >= 25) {
+        vacationDays += 3;
+      } else if (yearsOfService >= 20) {
+        vacationDays += 2;
+      } else if (yearsOfService >= 15) {
+        vacationDays += 1;
+      }
+
+      if (isOfficer) {
+        if (yearsOfService >= 30) {
+          cross = "Placa de la Real y Militar Orden de San Hermenegildo";
+        } else if (yearsOfService >= 25) {
+          cross = "Encomienda de la Real y Militar Orden de San Hermenegildo";
+        } else if (yearsOfService >= 20) {
+          cross = "Cruz de la Real y Militar Orden de San Hermenegildo";
+        } else {
+          cross = "Sin condecoración por antigüedad";
+        }
+      } else {
+        if (yearsOfService >= 30) {
+          cross = "Cruz de Oro a la Constancia en el Servicio";
+        } else if (yearsOfService >= 25) {
+          cross = "Cruz de Plata a la Constancia en el Servicio";
+        } else if (yearsOfService >= 15) {
+          cross = "Cruz de Bronce a la Constancia en el Servicio";
+        } else {
+          cross = "Sin condecoración por antigüedad";
+        }
+      }
+      
+      if (trienios >= 6) personalLeaveDays += 2;
+      if (trienios >= 8) personalLeaveDays += (trienios - 7);
+
+      function calculateAdditionalDays(year) {
+        let additionalDays = 0;
+        const dec24 = new Date(year, 11, 24).getDay();
+        const dec31 = new Date(year, 11, 31).getDay();
+
+        if ((dec24 === 0 || dec24 === 6)) additionalDays += 1;
+        if ((dec31 === 0 || dec31 === 6)) additionalDays += 1;
+
+        const nationalHolidays = ['01-01', '01-06', '05-01', '08-15', '10-12', '11-01', '12-06', '12-08'];
+        let saturdayHolidays = 0;
+        nationalHolidays.forEach(holiday => {
+          const [month, day] = holiday.split('-');
+          const holidayDate = new Date(year, month - 1, day);
+          if (holidayDate.getDay() === 6) { 
+            saturdayHolidays += 1;
+          }
+        });
+        
+        return Math.min(additionalDays + saturdayHolidays, 2);
+      }
+
+      const festiveDays = calculateAdditionalDays(queryYear);
+      personalLeaveDays += festiveDays;
+
+      resultsSection.innerHTML = `
+        <div class="p-5 rounded-lg bg-gray-50 border border-gray-200 animate-fadeIn text-center">
+          <h4 class="text-sm font-semibold text-gray-600">Años de servicio</h4>
+          <p class="mt-1 text-lg font-bold text-gray-900">${yearsOfService} años</p>
+        </div>
+        <div class="p-5 rounded-lg bg-gray-50 border border-gray-200 animate-fadeIn text-center">
+          <h4 class="text-sm font-semibold text-gray-600">Trienios cumplidos</h4>
+          <p class="mt-1 text-lg font-bold text-gray-900">${trienios}</p>
+        </div>
+        <div class="p-5 rounded-lg bg-gray-50 border border-gray-200 animate-fadeIn text-center">
+          <h4 class="text-sm font-semibold text-gray-600">Vacaciones</h4>
+          <p class="mt-1 text-lg font-bold text-gray-900">${vacationDays} días</p>
+        </div>
+        <div class="p-5 rounded-lg bg-gray-50 border border-gray-200 animate-fadeIn text-center">
+          <h4 class="text-sm font-semibold text-gray-600">Asuntos particulares</h4>
+          <p class="mt-1 text-lg font-bold text-gray-900">${personalLeaveDays} días</p>
+        </div>
+        <div class="p-5 rounded-lg bg-gray-50 border border-gray-200 animate-fadeIn text-center md:col-span-2">
+          <h4 class="text-sm font-semibold text-gray-600">Condecoración</h4>
+          <p class="mt-1 text-base font-medium text-gray-800">${cross}</p>
+        </div>
+      `;
+    });
+  </script>
+</body>
+</html>
